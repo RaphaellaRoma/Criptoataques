@@ -152,6 +152,22 @@ def exibir_hexdump(dados: BytesLike, largura: int = 16) -> str:
         linhas.append(f"{offset:08x}  {hex_bytes:<{largura*3}}  |{ascii_parte}|")
     return "\n".join(linhas)
 
+# conversões texto <-> inteiro
+
+def texto_para_inteiro(texto: str) -> tuple[int, int]:
+    """
+    Converte texto para inteiro.
+    Retorna o inteiro e o número de bytes usados.
+    """
+    b = texto.encode('utf-8')
+    return bytes_para_inteiro(b), len(b)
+
+def inteiro_para_texto(m: int, tamanho: int) -> str:
+    """
+    Converte inteiro de volta para texto, sabendo quantos bytes foram usados.
+    """
+    b = inteiro_para_bytes(m, tamanho)
+    return b.decode('utf-8')
 
 __all__ = [
     "inteiro_para_bytes",
@@ -165,4 +181,6 @@ __all__ = [
     "codificar_base64",
     "decodificar_base64",
     "exibir_hexdump",
+    "texto_para_inteiro",
+    "inteiro_para_texto",
 ]

@@ -23,6 +23,8 @@ from crypto_io import (
     codificar_base64,
     decodificar_base64,
     exibir_hexdump,
+    texto_para_inteiro,
+    inteiro_para_texto,
 )
 
 
@@ -149,3 +151,13 @@ def test_exibir_hexdump():
 def test_exibir_hexdump_tipo_invalido():
     with pytest.raises(TypeError):
         exibir_hexdump("nao_bytes")
+
+# ===============================
+# Testes: texto <-> inteiro
+# ===============================
+
+def test_texto_para_inteiro_e_reverso():
+    texto = "Teste de conversão Enaile"
+    n = texto_para_inteiro(texto)
+    texto_recuperado = inteiro_para_texto(n, (n.bit_length() + 7) // 8)
+    assert texto == texto_recuperado
