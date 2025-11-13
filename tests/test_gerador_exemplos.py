@@ -11,7 +11,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from lib.ataques.rsa_franklin_reiter.gerador_exemplos import gerador_caso_relacionado_linear
-from lib.io.util_io import texto_para_inteiro, inteiro_para_texto
+from crypto_io.util_io import texto_para_inteiro, inteiro_para_texto
 
 def test_gerador_retorna_campos_basicos():
     caso = gerador_caso_relacionado_linear(bits=512) 
