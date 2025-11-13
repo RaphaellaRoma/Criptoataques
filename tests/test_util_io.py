@@ -158,6 +158,6 @@ def test_exibir_hexdump_tipo_invalido():
 
 def test_texto_para_inteiro_e_reverso():
     texto = "Teste de conversão Enaile"
-    n = texto_para_inteiro(texto)
-    texto_recuperado = inteiro_para_texto(n, (n.bit_length() + 7) // 8)
+    n, nbytes = texto_para_inteiro(texto)
+    texto_recuperado = inteiro_para_texto(n, nbytes)
     assert texto == texto_recuperado
