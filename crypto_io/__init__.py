@@ -16,6 +16,8 @@ from .util_io import (
     codificar_base64,
     decodificar_base64,
     exibir_hexdump,
+    texto_para_inteiro,
+    inteiro_para_texto,
 )
 
 __all__ = [
@@ -30,4 +32,6 @@ __all__ = [
     "codificar_base64",
     "decodificar_base64",
     "exibir_hexdump",
+    "texto_para_inteiro",
+    "inteiro_para_texto",
 ]
