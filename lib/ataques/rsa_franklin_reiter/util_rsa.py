@@ -1,7 +1,7 @@
 # geração de par de chaves; encriptação; decriptação...
 
 import random
-from lib.number_theory import egcd, modinv, is_probable_prime
+from .aritmetica_modular import egcd, modinv, is_probable_prime
 
 
 def generate_prime(bits: int):

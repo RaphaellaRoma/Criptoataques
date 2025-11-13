@@ -1,5 +1,7 @@
 from typing import Tuple, Dict
-from .util_rsa import gerador_rsa_chaves, rsa_encriptador
+from .util_rsa import generate_rsa_keypair as gerador_rsa_chaves, rsa_encrypt as rsa_encriptador
+from crypto_io.util_io import texto_para_inteiro as _texto_para_inteiro
+from typing import Optional
 import secrets
 
 def gerador_caso_relacionado_linear(bits: int = 1024, a: Optional[int] = None, b: Optional[int] = None,texto: Optional[str] = None,) -> Tuple[Optional[str], Dict[str, int]]:
