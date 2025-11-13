@@ -1,15 +1,14 @@
-from typing import Tuple, Dict
+from typing import Dict
 from .util_rsa import generate_rsa_keypair as gerador_rsa_chaves, rsa_encrypt as rsa_encriptador
 from crypto_io.util_io import texto_para_inteiro as _texto_para_inteiro
 from typing import Optional
 import secrets
 
-def gerador_caso_relacionado_linear(bits: int = 1024, a: Optional[int] = None, b: Optional[int] = None,texto: Optional[str] = None,) -> Tuple[Optional[str], Dict[str, int]]:
+def gerador_caso_relacionado_linear(bits: int = 1024, a: Optional[int] = None, b: Optional[int] = None,texto: Optional[str] = None,) -> Dict[str, int]:
     """
     Gera caso didático para Franklin-Reiter. 
 
     Retorna:
-    (texto_original_ou_None, caso)
     caso contém: { 'n','e','d','a','b','m1','m2','c1','c2' }
     Se 'texto' foi fornecido também retorna 'nbytes' dentro do dicionário para decodificar.
     """
@@ -19,7 +18,9 @@ def gerador_caso_relacionado_linear(bits: int = 1024, a: Optional[int] = None, b
     if bits < 256:
         raise ValueError("bits deve ser >= 256 (use >=1024).")
 
-    n, e, d = gerador_rsa_chaves(bits)
+    public_key, private_key = gerador_rsa_chaves(bits)
+    e, n = public_key
+    d, p, q = private_key
 
     if not isinstance(n, int) or n <= 3:
         raise RuntimeError("Chave RSA inválida retornada por gerador_rsa_chaves.")
@@ -69,8 +70,8 @@ def gerador_caso_relacionado_linear(bits: int = 1024, a: Optional[int] = None, b
     else:
         m2 = (a * m1 + b) % n
 
-    c1 = rsa_encriptador(m1, e, n)
-    c2 = rsa_encriptador(m2, e, n)
+    c1 = rsa_encriptador(m1, (e, n))
+    c2 = rsa_encriptador(m2, (e, n))
 
     if not (isinstance(c1, int) and isinstance(c2, int) and 0 <= c1 < n and 0 <= c2 < n):
         raise RuntimeError("rsa_encriptador retornou ciphertext(s) inválido(s).")
@@ -90,4 +91,4 @@ def gerador_caso_relacionado_linear(bits: int = 1024, a: Optional[int] = None, b
     if nbytes is not None:
         caso["nbytes"] = nbytes
 
-    return (texto if texto is not None else None, caso)
+    return caso
