@@ -86,3 +86,21 @@ def construir_polinomio_de_relacao(a: int, b: int, e: int, c: int, n: int) -> li
     polinomio[0] = (polinomio[0] - c) % n
     
     return polinomio
+
+def tentativa_de_recuperação_de_mensagem(polinomio: list[int], n: int) -> int | None: 
+    """ 
+    Tenta recuperar a mensagem m1 a partir do polinômio construído. 
+    Procura raízes inteiras do polinômio no intervalo [0, n-1]. 
+    
+    Arguments: 
+        polinomio: lista de coeficientes do polinômio 
+        n: módulo RSA 
+        
+    Returns: 
+        int | None: A mensagem m1 se encontrada, caso contrário None 
+    """ 
+    
+    for m1 in range(n): 
+        if poly_eval(polinomio, m1) % n == 0: 
+            return m1 
+    return None
