@@ -5,87 +5,101 @@
 """
 from math import comb
 from sympy import symbols, Poly, expand
+
+def expandir_relacao_linear(a: int, b: int, e: int, c: int, n: int | None = None) -> list[int]:
+    """
+    Expande o polinômio (a*x + b)^e - c.
+
+    - Se n=None, retorna coeficientes inteiros exatos.
+    - Se n!=None, retorna coeficientes reduzidos módulo n.
+
+    Retorna os coeficientes em ordem crescente:
+    [c0, c1, c2, ...] representando c0 + c1*x + c2*x^2 + ...
+
+    Args:
+        a, b: relação linear m2 = a*m1 + b
+        e: expoente público RSA
+        c: cifra associada c2 = m2^e
+        n: módulo RSA
+
+    Returns:
+        list[int]: coeficientes do polinômio.
+    """
+
+    coefs = [0] * (e + 1)
+
+    for k in range(e + 1):
+        # expansão do binômio: (a*m1 + b)^e = soma(k=0 até e) [comb(e,k) * (a*m1)^k * b^(e-k)]
+        # como estamos construindo o polinômio em m1, o coeficiente do termo m1^k é:
+        coef = comb(e, k) * (a ** k) * (b ** (e - k))
+
+        if n is not None:
+            coef %= n
+
+        coefs[k] = coef
+
+    # subtrai a cifra do termo constante
+    if n is None:
+        coefs[0] -= c
+    else:
+        coefs[0] = (coefs[0] - c) % n
+
+    return coefs
+
+
 def construir_polinomio_para_cifra(e: int, c1: int, a: int, b: int, c2: int) -> tuple[list[int], list[int]]:
     """
-    Constrói os polinômios que representam a relação entre mensagens e cifras:
-    - f(x) = x^e - c1 (primeira mensagem cifrada)
-    - g(x) = (a*x + b)^e - c2 (segunda mensagem cifrada com relação linear)
-    
-    Retorna os coeficientes de ambos os polinômios em ordem crescente de grau.
-    Ex.: [c0, c1, c2, ...] representa c0 + c1*x + c2*x^2 + ...
-    
-    Arguments:
+    Constrói dois polinômios usados no ataque Franklin–Reiter:
+
+    - f(x) = x^e - c1
+    - g(x) = (a*x + b)^e - c2
+
+    Retorna os coeficientes em ordem crescente.
+
+    Args:
         e: expoente público RSA
-        c1: cifra da primeira mensagem (c1 = m1^e)
-        a: coeficiente da relação linear m2 = a*m1 + b
-        b: constante da relação linear m2 = a*m1 + b
-        c2: cifra da segunda mensagem (c2 = m2^e)
-    
+        c1: cifra da primeira mensagem
+        a, b: parâmetros da relação linear m2 = a*m1 + b
+        c2: cifra da segunda mensagem
+
     Returns:
-        tuple[list[int], list[int]]: (coeficientes_f, coeficientes_g)
+        (f_coefs, g_coefs)
     """
+
     if not (isinstance(e, int) and e > 0):
         raise ValueError("e deve ser inteiro positivo.")
-    
-    # Inicializa polinômios de grau e
+
+    # f(x)
     f_coefs = [0] * (e + 1)
-    g_coefs = [0] * (e + 1)
-    
-    # f(x) = x^e - c1
-    # Coeficientes: [−c1, 0, 0, ..., 1] (termo constante -c1, termo de grau e é 1)
     f_coefs[0] = -c1
     f_coefs[e] = 1
-    
-    # g(x) = (a*x + b)^e - c2
-    # Usa binômio de Newton: (a*x + b)^e = soma(k=0 até e) [comb(e,k) * (a*x)^k * b^(e-k)]
-    for k in range(e + 1):
-        coef_binomial = comb(e, k)
-        # Coeficiente do termo x^k é: comb(e,k) * a^k * b^(e-k)
-        g_coefs[k] = coef_binomial * (a ** k) * (b ** (e - k))
-    
-    # Subtrai c2 do termo constante
-    g_coefs[0] -= c2
-    
+
+    # g(x)
+    g_coefs = expandir_relacao_linear(a, b, e, c2, n=None)
+
     return f_coefs, g_coefs
-
-
-
 
 
 def construir_polinomio_de_relacao(a: int, b: int, e: int, c: int, n: int) -> list[int]:
     """
-    Constrói o polinômio que expressa a relação entre duas mensagens cifradas
-    no ataque de franklin reiter. Seja m2 = a*m1 + b -> (a*m1 + b)^e = c (mod n)
-    Polinômio representa p(x) = (a*x + b)^e - c (mod n)
-    Retorna os coeficientes do polinômio em ordem crescente de grau.
-    Ex.: [c0, c1, c2, ...] representa c0 + c1*x + c2*x^2 + ...
-    
-    Arguments:
-        a: coeficiente da relação linear m2 = a*m1 + b
-        b: constante da relação linear m2 = a*m1 + b
-        e: expoente público RSA
-        c: cifra da segunda mensagem (c2 = m2^e mod n)
-        n: módulo RSA
-    
-    Returns:
-       list[int]: Lista de coeficientes do polinômio reduzido módulo n
-    """
-    
-    # inicializa polinômio de grau e
-    polinomio = [0] * (e + 1)
-    
-    # calcula coeficientes usando binômio de Newton
-    for k in range(e + 1):
-        coef_binomial = comb(e, k)
+    Constrói o polinômio: p(x) = (a*x + b)^e - c   (mod n)
 
-        # expansão do binômio: (a*m1 + b)^e = soma(k=0 até e) [comb(e,k) * (a*m1)^k * b^(e-k)]
-        # como estamos construindo o polinômio em m1, o coeficiente do termo m1^k é:
-        coef = (coef_binomial * pow(a, k, n) * pow(b, e - k, n)) % n
-        polinomio[k] = coef
-    
-    polinomio[0] = (polinomio[0] - c) % n
-    
-    return polinomio
+    Usado diretamente no ataque Franklin–Reiter para encontrar m1.
+
+    Retorna coeficientes reduzidos módulo n.
+
+    Args:
+        a, b: relação linear m2 = a*m1 + b
+        e: expoente público RSA
+        c: cifra da segunda mensagem
+        n: módulo RSA
+
+    Returns:
+        list[int]: coeficientes do polinômio mod n
+    """
+
+    return expandir_relacao_linear(a, b, e, c, n)
+
 
 def tentativa_de_recuperação_de_mensagem(polinomio: list[int], n: int) -> int | None: 
     """ 
