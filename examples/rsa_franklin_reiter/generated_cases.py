@@ -1,8 +1,7 @@
 from typing import Dict, Tuple, Optional
 import random
 
-from .util_rsa import generate_rsa_keypair as gerador_rsa_chaves, rsa_encrypt as rsa_encriptador
-
+from lib.ataques.rsa_franklin_reiter.util_rsa import gerador_rsa_chaves
 
 def make_linear_related_case(m1: int, m2: int, bits: int = 1024) -> Dict[str, int]:
     """
