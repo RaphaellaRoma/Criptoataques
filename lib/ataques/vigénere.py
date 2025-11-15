@@ -1,0 +1,120 @@
+import string as s
+
+class VigenereCifra:
+    def __init__(self):
+        self.alfabeto = list(s.ascii_uppercase)
+        self.freq_pt = [14.63, 1.04, 3.88, 4.99, 12.57, 1.02, 1.30, 1.28, 6.18, 0.40, 0.02, 2.78, 4.74, 5.05, 10.73, 2.52, 1.20, 6.53, 7.81, 4.34, 4.63, 1.67, 0.01, 0.21, 0.01, 0.47]
+        self.freq_ing =[8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.966, 0.153, 0.772, 4.025, 2.406, 6.749, 7.507, 1.929, 0.095, 5.987, 6.327, 9.056, 2.758, 0.978, 2.360, 0.150, 1.974, 0.074]
+    
+    def limpar_texto(self, texto: str) -> str:
+        """Remove caracteres não alfabéticos e converte para maiúsculas."""
+        texto_limpo = "".join([c.upper() for c in texto if c.isalpha()])
+        return texto_limpo
+
+
+    def tamanho_chave(self, texto_cifrado: str, max_key_length: int = 20) -> int:
+        """Estima o tamanho da chave usando o método de Kasiski."""
+        texto = self.limpar_texto(texto_cifrado)
+
+        pos_trigramas = {}
+        for i in range(1, len(texto)-2):
+            trigrama = texto[i:i+3]
+            pos_trigramas.setdefault(trigrama, []).append(i)
+        distancias = {}
+        # calcula distâncias entre ocorrências de trigramas
+        for trigrama, posicoes in pos_trigramas.items():
+            if len(posicoes) > 1:
+                for i in range(len(posicoes)-1):
+                    for p1, p2 in combinations(posicoes, 2):
+                        distancia = p2 - p1
+                        distancias.setdefault(trigrama, []).append(distancia)
+        
+        distancias_completo = set()
+        for dist in distancias.values():
+            distancias_completo.update(dist)
+        distancias_completo = list(distancias_completo)
+        
+        freq_divisores = {i: 0 for i in range(3, 21)}
+
+        for dist in distancias_completo:
+            for div in range(3, max_key_length + 1):
+                if dist % div == 0:
+                    freq_divisores[div] += 1
+
+        freq_divisores_sorted = dict(sorted(freq_divisores.items(), key=lambda x: x[1], reverse=True))
+
+        print("Tamanhos de chave possíveis (ordenados por frequência):")
+        for tamanho, qtd in freq_divisores_sorted.items():
+            print(f"Tamanho: {tamanho} -- Quantidade: {qtd}")
+
+        tamanho_provavel = next(iter(freq_divisores_sorted))
+
+        print("\nTamanho provável da chave:", tamanho_provavel)
+
+        # Perguntar ao usuário
+        ans = input("Você deseja continuar com esse tamanho da chave? (S/N)\n>>> ")
+
+        if ans.lower() == 'n':
+            escolha = int(input(f"Digite o tamanho da chave desejado (entre 3 e {max_key_length}).\n>>> "))
+            while escolha < 3 or escolha > max_key_length:
+                escolha = int(input(f"Tamanho inválido. Digite um número entre 3 e {max_key_length}.\n>>> "))
+            return escolha
+
+        return tamanho_provavel
+
+     def descobrir_letra(self, probabilidades, idioma):
+        melhor_letra = ''
+        menor_diferenca = float('inf')
+
+        if idioma == 'EN':
+            freq_idioma = self.eng_probabilities
+        else:
+            freq_idioma = self.pt_probabilities
+
+        for shift in range(26):
+            soma_diferencas = 0
+
+            # Compara a distribuição rotacionada com a frequência do idioma
+            for j in range(26):
+                soma_diferencas += abs(probabilidades[(shift + j) % 26] - freq_idioma[j])
+
+            # Escolhe o shift com menor diferença
+            if soma_diferencas < menor_diferenca:
+                menor_diferenca = soma_diferencas
+                melhor_letra = self.alphabet[shift]
+
+        return melhor_letra
+
+
+
+    def quebra_chave(self, texto_cifrado: str, tamanho_chave: int, idioma: str = 'pt') -> str:
+        """Quebra a cifra de Vigenère dado o tamanho da chave."""
+        texto = self.limpar_texto(texto_cifrado)
+        palavra_chave = ""
+
+        for indice in range(tamanho_chave):
+
+            # Frequência das letras dessa coluna
+            freq_coluna = {}
+            total = 0
+
+            for pos in range(indice, len(texto), tamanho_chave):
+                letra = texto[pos]
+                freq_coluna[letra] = freq_coluna.get(letra, 0) + 1
+                total += 1
+
+            # Constrói vetor de probabilidades na ordem do alfabeto
+            probabilidades = [
+                (freq_coluna.get(letra, 0) / total) * 100
+                for letra in self.alphabet
+            ]
+
+            # Descobre letra da chave
+            letra_chave = self.descobrir_letra(probabilidades, idioma)
+            palavra_chave += letra_chave
+
+        return palavra_chave
+
+
+
+   
