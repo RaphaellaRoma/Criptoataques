@@ -115,6 +115,44 @@ class VigenereCifra:
 
         return palavra_chave
 
+    def transformar_chave(self, chave: str) -> str:
+        """Transforma a chave para o formato usado na cifra."""
+
+        if not all(c.upper() in self.alphabet for c in chave):
+            raise ValueError('Chave inválida')
+        if len(chave) > len(texto):
+            return chave[:len(texto)] 
+
+        chave = self.limpar_texto(chave)
+        chave_nova = ""
+        i = 0
+
+        for _ in texto:
+            chave_nova += chave[i]
+            i = (i + 1) % len(chave)
 
 
-   
+        return chave_nova
+    def encriptar_decriptar(self, texto: str, chave: str, opcao: str) -> str:
+        """Encripta ou decripta o texto usando a cifra de Vigenère."""
+        if opcao in ('ENCRIPTAR', 'DECRIPTAR'):
+            if len(texto) <= 0 or len(chave) < 3:
+                raise ValueError('Tamanho do texto ou da chave inválido')
+        else:
+            raise ValueError('Opção inválida!')
+
+        if opcao != 'ENCRIPTAR' and opcao != 'DECRIPTAR':
+            raise ValueError('Opção inválida!')
+        texto = self.limpar_texto(texto)
+        chave = self.limpar_texto(chave)
+        chave_nova = self.transformar_chave(chave, texto)
+
+        resultado = ""
+        for letra in texto:
+            if opcao == 'ENCRIPTAR':
+                nova_letra = self.alphabet[(self.alphabet.index(letra) + self.alphabet.index(chave_nova[len(resultado)])) % 26]
+            else:
+                nova_letra = self.alphabet[(self.alphabet.index(letra) - self.alphabet.index(chave_nova[len(resultado)]) + 26) % 26]
+            resultado += nova_letra
+
+        return resultado
