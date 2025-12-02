@@ -16,17 +16,6 @@ class VigenereCifra:
         texto = texto.encode('ascii', 'ignore').decode('utf-8')
         return texto.upper()
 
-    def _limpar_texto(self, texto: str) -> str:
-        """Remove caracteres não alfabéticos e converte para maiúsculas."""
-        # Normaliza acentos (É → E, Ç → C, Ã → A...)
-        texto = unicodedata.normalize('NFD', texto)
-        texto = texto.encode('ascii', 'ignore').decode('utf-8')
-
-        # Agora deixa só A–Z
-        texto = texto.upper()
-        texto = re.sub(r'[^A-Z]', '', texto)
-
-        return texto
     def _descobrir_letra(self, probabilidades, idioma):
         melhor_letra = ''
         menor_diferenca = float('inf')
