@@ -1,7 +1,7 @@
 import argparse
 from typing import Optional, Dict
 
-from cipher import (
+from .cipher import (
     cifrar,
     decifrar,
 )

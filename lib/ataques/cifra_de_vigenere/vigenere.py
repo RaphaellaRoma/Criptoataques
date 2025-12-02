@@ -12,7 +12,7 @@ class VigenereCifra:
         texto_limpo = "".join([c.upper() for c in texto if c.isalpha()])
         return texto_limpo
 
-     def descobrir_letra(self, probabilidades, idioma):
+    def descobrir_letra(self, probabilidades, idioma):
         melhor_letra = ''
         menor_diferenca = float('inf')
 

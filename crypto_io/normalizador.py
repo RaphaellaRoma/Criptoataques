@@ -23,7 +23,9 @@ def somente_letras(texto: str, alfabeto: str) -> str:
     return ''.join(c for c in texto if c in alfabeto)
 
 
-def normalizar_texto(texto: str, alfabeto: str, remover_espacos: bool = False) -> str:
+ALFABETO_PADRAO = "abcdefghijklmnopqrstuvwxyz"
+
+def normalizar_texto(texto, alfabeto=ALFABETO_PADRAO, remover_espacos=False) -> str:
     """
     Normaliza texto:
     - caixa alta

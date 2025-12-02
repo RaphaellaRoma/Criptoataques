@@ -1,0 +1,33 @@
+"""
+Pacote estatisticas
+
+Funções para análise estatística geral de textos.
+"""
+
+from .algoritmos import (
+    medir_tempo,
+    expansao_tamanho,
+    calcular_avalanche,
+)
+
+from .comparacoes import comparar_algoritmos
+
+from .texto import (
+    contar_frequencias,
+    frequencia_relativa,
+    entropia,
+    indice_coincidencia,
+    tamanho_bytes,
+)
+
+__all__ = [
+    "medir_tempo",
+    "expansao_tamanho",
+    "calcular_avalanche",
+    "comparar_algoritmos",
+    "contar_frequencias",
+    "frequencia_relativa",
+    "entropia",
+    "indice_coincidencia",
+    "tamanho_bytes",
+]
