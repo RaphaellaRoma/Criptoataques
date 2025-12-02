@@ -1,25 +1,32 @@
 import string as s
+from itertools import combinations
 
 class VigenereCifra:
     def __init__(self):
-        self.alfabeto = list(s.ascii_uppercase)
-        self.freq_pt = [14.63, 1.04, 3.88, 4.99, 12.57, 1.02, 1.30, 1.28, 6.18, 0.40, 0.02, 2.78, 4.74, 5.05, 10.73, 2.52, 1.20, 6.53, 7.81, 4.34, 4.63, 1.67, 0.01, 0.21, 0.01, 0.47]
-        self.freq_ing =[8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.966, 0.153, 0.772, 4.025, 2.406, 6.749, 7.507, 1.929, 0.095, 5.987, 6.327, 9.056, 2.758, 0.978, 2.360, 0.150, 1.974, 0.074]
+        self._alfabeto = list(s.ascii_uppercase)
+        self._freq_pt = [14.63, 1.04, 3.88, 4.99, 12.57, 1.02, 1.30, 1.28, 6.18, 0.40, 0.02, 2.78, 4.74, 5.05, 10.73, 2.52, 1.20, 6.53, 7.81, 4.34, 4.63, 1.67, 0.01, 0.21, 0.01, 0.47]
+        self._freq_ing =[8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.966, 0.153, 0.772, 4.025, 2.406, 6.749, 7.507, 1.929, 0.095, 5.987, 6.327, 9.056, 2.758, 0.978, 2.360, 0.150, 1.974, 0.074]
+    
+    def __getattr__(self, name):
+        """Bloqueia acesso a atributos privados."""
+        if name.startswith('_'):
+            raise AttributeError(f"'{type(self).__name__}' não tem acesso ao atributo privado '{name}'")
+        raise AttributeError(f"'{type(self).__name__}' não tem atributo '{name}'")
     
     # Funções auxiliares
-    def limpar_texto(self, texto: str) -> str:
+    def _limpar_texto(self, texto: str) -> str:
         """Remove caracteres não alfabéticos e converte para maiúsculas."""
         texto_limpo = "".join([c.upper() for c in texto if c.isalpha()])
         return texto_limpo
 
-     def descobrir_letra(self, probabilidades, idioma):
+    def _descobrir_letra(self, probabilidades, idioma):
         melhor_letra = ''
         menor_diferenca = float('inf')
 
         if idioma == 'EN':
-            freq_idioma = self.eng_probabilities
+            freq_idioma = self._freq_ing
         else:
-            freq_idioma = self.pt_probabilities
+            freq_idioma = self._freq_pt
 
         for shift in range(26):
             soma_diferencas = 0
@@ -31,20 +38,20 @@ class VigenereCifra:
             # Escolhe o shift com menor diferença
             if soma_diferencas < menor_diferenca:
                 menor_diferenca = soma_diferencas
-                melhor_letra = self.alphabet[shift]
+                melhor_letra = self._alfabeto[shift]
 
         return melhor_letra
 
 
-    def transformar_chave(self, chave: str) -> str:
+    def _transformar_chave(self, texto: str, chave: str) -> str:
         """Transforma a chave para o formato usado na cifra."""
 
-        if not all(c.upper() in self.alphabet for c in chave):
+        if not all(c.upper() in self._alfabeto for c in chave):
             raise ValueError('Chave inválida')
         if len(chave) > len(texto):
             return chave[:len(texto)] 
 
-        chave = self.limpar_texto(chave)
+        chave = self._limpar_texto(chave)
         chave_nova = ""
         i = 0
 
@@ -59,7 +66,7 @@ class VigenereCifra:
     # FUNÇÕES PRINCIPAIS
     def tamanho_chave(self, texto_cifrado: str, max_key_length: int = 20) -> int:
         """Estima o tamanho da chave usando o método de Kasiski."""
-        texto = self.limpar_texto(texto_cifrado)
+        texto = self._limpar_texto(texto_cifrado)
 
         pos_trigramas = {}
         for i in range(1, len(texto)-2):
@@ -110,7 +117,7 @@ class VigenereCifra:
 
     def quebra_chave(self, texto_cifrado: str, tamanho_chave: int, idioma: str = 'pt') -> str:
         """Quebra a cifra de Vigenère dado o tamanho da chave."""
-        texto = self.limpar_texto(texto_cifrado)
+        texto = self._limpar_texto(texto_cifrado)
         palavra_chave = ""
 
         for indice in range(tamanho_chave):
@@ -127,11 +134,11 @@ class VigenereCifra:
             # Constrói vetor de probabilidades na ordem do alfabeto
             probabilidades = [
                 (freq_coluna.get(letra, 0) / total) * 100
-                for letra in self.alphabet
+                for letra in self._alfabeto
             ]
 
             # Descobre letra da chave
-            letra_chave = self.descobrir_letra(probabilidades, idioma)
+            letra_chave = self._descobrir_letra(probabilidades, idioma)
             palavra_chave += letra_chave
 
         return palavra_chave
@@ -147,16 +154,16 @@ class VigenereCifra:
 
         if opcao != 'ENCRIPTAR' and opcao != 'DECRIPTAR':
             raise ValueError('Opção inválida!')
-        texto = self.limpar_texto(texto)
-        chave = self.limpar_texto(chave)
-        chave_nova = self.transformar_chave(chave, texto)
+        texto = self._limpar_texto(texto)
+        chave = self._limpar_texto(chave)
+        chave_nova = self._transformar_chave(texto, chave)
 
         resultado = ""
         for letra in texto:
             if opcao == 'ENCRIPTAR':
-                nova_letra = self.alphabet[(self.alphabet.index(letra) + self.alphabet.index(chave_nova[len(resultado)])) % 26]
+                nova_letra = self._alfabeto[(self._alfabeto.index(letra) + self._alfabeto.index(chave_nova[len(resultado)])) % 26]
             else:
-                nova_letra = self.alphabet[(self.alphabet.index(letra) - self.alphabet.index(chave_nova[len(resultado)]) + 26) % 26]
+                nova_letra = self._alfabeto[(self._alfabeto.index(letra) - self._alfabeto.index(chave_nova[len(resultado)]) + 26) % 26]
             resultado += nova_letra
 
         return resultado
