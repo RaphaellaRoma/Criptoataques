@@ -1,5 +1,7 @@
 import string as s
 from itertools import combinations
+import unicodedata
+import re
 
 class VigenereCifra:
     def __init__(self):
@@ -7,18 +9,24 @@ class VigenereCifra:
         self._freq_pt = [14.63, 1.04, 3.88, 4.99, 12.57, 1.02, 1.30, 1.28, 6.18, 0.40, 0.02, 2.78, 4.74, 5.05, 10.73, 2.52, 1.20, 6.53, 7.81, 4.34, 4.63, 1.67, 0.01, 0.21, 0.01, 0.47]
         self._freq_ing =[8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.966, 0.153, 0.772, 4.025, 2.406, 6.749, 7.507, 1.929, 0.095, 5.987, 6.327, 9.056, 2.758, 0.978, 2.360, 0.150, 1.974, 0.074]
     
-    def __getattr__(self, name):
-        """Bloqueia acesso a atributos privados."""
-        if name.startswith('_'):
-            raise AttributeError(f"'{type(self).__name__}' não tem acesso ao atributo privado '{name}'")
-        raise AttributeError(f"'{type(self).__name__}' não tem atributo '{name}'")
-    
     # Funções auxiliares
+    def _normalizar_texto_para_cifrar(self, texto: str) -> str:
+        # remove acentos (Ç→C, Á→A...)
+        texto = unicodedata.normalize('NFD', texto)
+        texto = texto.encode('ascii', 'ignore').decode('utf-8')
+        return texto.upper()
+
     def _limpar_texto(self, texto: str) -> str:
         """Remove caracteres não alfabéticos e converte para maiúsculas."""
-        texto_limpo = "".join([c.upper() for c in texto if c.isalpha()])
-        return texto_limpo
+        # Normaliza acentos (É → E, Ç → C, Ã → A...)
+        texto = unicodedata.normalize('NFD', texto)
+        texto = texto.encode('ascii', 'ignore').decode('utf-8')
 
+        # Agora deixa só A–Z
+        texto = texto.upper()
+        texto = re.sub(r'[^A-Z]', '', texto)
+
+        return texto
     def _descobrir_letra(self, probabilidades, idioma):
         melhor_letra = ''
         menor_diferenca = float('inf')
@@ -44,22 +52,19 @@ class VigenereCifra:
 
 
     def _transformar_chave(self, texto: str, chave: str) -> str:
-        """Transforma a chave para o formato usado na cifra."""
+        chave = self._limpar_texto(chave).upper()
 
-        if not all(c.upper() in self._alfabeto for c in chave):
-            raise ValueError('Chave inválida')
-        if len(chave) > len(texto):
-            return chave[:len(texto)] 
-
-        chave = self._limpar_texto(chave)
-        chave_nova = ""
+        nova = ""
         i = 0
 
-        for _ in texto:
-            chave_nova += chave[i]
-            i = (i + 1) % len(chave)
+        for c in texto:
+            if c in self._alfabeto:
+                nova += chave[i]
+                i = (i + 1) % len(chave)
+            else:
+                nova += c  # mantém espaço/pontuação/algo não-AZ
+        return nova
 
-        return chave_nova
 
 
 
@@ -86,10 +91,10 @@ class VigenereCifra:
             distancias_completo.update(dist)
         distancias_completo = list(distancias_completo)
         
-        freq_divisores = {i: 0 for i in range(3, 21)}
+        freq_divisores = {i: 0 for i in range(4, max_key_length + 1)}
 
         for dist in distancias_completo:
-            for div in range(3, max_key_length + 1):
+            for div in range(4, max_key_length + 1):
                 if dist % div == 0:
                     freq_divisores[div] += 1
 
@@ -104,15 +109,15 @@ class VigenereCifra:
         print("\nTamanho provável da chave:", tamanho_provavel)
 
         # Perguntar ao usuário
-        ans = input("Você deseja continuar com esse tamanho da chave? (S/N)\n>>> ")
+        # ans = input("Você deseja continuar com esse tamanho da chave? (S/N)\n>>> ")
 
-        if ans.lower() == 'n':
-            escolha = int(input(f"Digite o tamanho da chave desejado (entre 3 e {max_key_length}).\n>>> "))
-            while escolha < 3 or escolha > max_key_length:
-                escolha = int(input(f"Tamanho inválido. Digite um número entre 3 e {max_key_length}.\n>>> "))
-            return escolha
+        # if ans.lower() == 'n':
+        #     escolha = int(input(f"Digite o tamanho da chave desejado (entre 4 e {max_key_length}).\n>>> "))
+        #     while escolha < 4 or escolha > max_key_length:
+        #         escolha = int(input(f"Tamanho inválido. Digite um número entre 4 e {max_key_length}.\n>>> "))
+        #     return escolha
 
-        return tamanho_provavel
+        # return tamanho_provavel
 
 
     def quebra_chave(self, texto_cifrado: str, tamanho_chave: int, idioma: str = 'pt') -> str:
@@ -144,26 +149,57 @@ class VigenereCifra:
         return palavra_chave
 
 
+    # def encriptar_decriptar(self, texto: str, chave: str, opcao: str) -> str:
+    #     """Encripta ou decripta o texto usando a cifra de Vigenère."""
+    #     if opcao in ('ENCRIPTAR', 'DECRIPTAR'):
+    #         if len(texto) <= 0 or len(chave) < 3:
+    #             raise ValueError('Tamanho do texto ou da chave inválido')
+    #     else:
+    #         raise ValueError('Opção inválida!')
+
+    #     if opcao != 'ENCRIPTAR' and opcao != 'DECRIPTAR':
+    #         raise ValueError('Opção inválida!')
+    #     texto = self._limpar_texto(texto)
+    #     chave = self._limpar_texto(chave)
+    #     chave_nova = self._transformar_chave(texto, chave)
+
+    #     resultado = ""
+    #     for letra in texto:
+    #         if opcao == 'ENCRIPTAR':
+    #             nova_letra = self._alfabeto[(self._alfabeto.index(letra) + self._alfabeto.index(chave_nova[len(resultado)])) % 26]
+    #         else:
+    #             nova_letra = self._alfabeto[(self._alfabeto.index(letra) - self._alfabeto.index(chave_nova[len(resultado)]) + 26) % 26]
+    #         resultado += nova_letra
+
+    #     return resultado
+    
     def encriptar_decriptar(self, texto: str, chave: str, opcao: str) -> str:
-        """Encripta ou decripta o texto usando a cifra de Vigenère."""
-        if opcao in ('ENCRIPTAR', 'DECRIPTAR'):
-            if len(texto) <= 0 or len(chave) < 3:
-                raise ValueError('Tamanho do texto ou da chave inválido')
-        else:
+        if opcao not in ('ENCRIPTAR', 'DECRIPTAR'):
             raise ValueError('Opção inválida!')
 
-        if opcao != 'ENCRIPTAR' and opcao != 'DECRIPTAR':
-            raise ValueError('Opção inválida!')
-        texto = self._limpar_texto(texto)
-        chave = self._limpar_texto(chave)
-        chave_nova = self._transformar_chave(texto, chave)
+        if len(texto) <= 0 or len(chave) < 4:
+            raise ValueError('Tamanho do texto ou da chave inválido')
+
+        # texto com espaços preservados e acentos removidos
+        texto_norm = self._normalizar_texto_para_cifrar(texto)
+        
+        # gera chave alinhada ao texto completo
+        chave_norm = self._limpar_texto(chave)
+        chave_nova = self._transformar_chave(texto_norm, chave_norm)
 
         resultado = ""
-        for letra in texto:
-            if opcao == 'ENCRIPTAR':
-                nova_letra = self._alfabeto[(self._alfabeto.index(letra) + self._alfabeto.index(chave_nova[len(resultado)])) % 26]
+        for letra, k in zip(texto_norm, chave_nova):
+            if letra in self._alfabeto:
+                pos_letra = self._alfabeto.index(letra)
+                pos_chave = self._alfabeto.index(k)
+
+                if opcao == 'ENCRIPTAR':
+                    nova = self._alfabeto[(pos_letra + pos_chave) % 26]
+                else:
+                    nova = self._alfabeto[(pos_letra - pos_chave + 26) % 26]
+
+                resultado += nova
             else:
-                nova_letra = self._alfabeto[(self._alfabeto.index(letra) - self._alfabeto.index(chave_nova[len(resultado)]) + 26) % 26]
-            resultado += nova_letra
+                resultado += letra  # copia o símbolo intacto
 
         return resultado
