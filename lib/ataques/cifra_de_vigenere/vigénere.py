@@ -6,12 +6,57 @@ class VigenereCifra:
         self.freq_pt = [14.63, 1.04, 3.88, 4.99, 12.57, 1.02, 1.30, 1.28, 6.18, 0.40, 0.02, 2.78, 4.74, 5.05, 10.73, 2.52, 1.20, 6.53, 7.81, 4.34, 4.63, 1.67, 0.01, 0.21, 0.01, 0.47]
         self.freq_ing =[8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.966, 0.153, 0.772, 4.025, 2.406, 6.749, 7.507, 1.929, 0.095, 5.987, 6.327, 9.056, 2.758, 0.978, 2.360, 0.150, 1.974, 0.074]
     
+    # Funções auxiliares
     def limpar_texto(self, texto: str) -> str:
         """Remove caracteres não alfabéticos e converte para maiúsculas."""
         texto_limpo = "".join([c.upper() for c in texto if c.isalpha()])
         return texto_limpo
 
+     def descobrir_letra(self, probabilidades, idioma):
+        melhor_letra = ''
+        menor_diferenca = float('inf')
 
+        if idioma == 'EN':
+            freq_idioma = self.eng_probabilities
+        else:
+            freq_idioma = self.pt_probabilities
+
+        for shift in range(26):
+            soma_diferencas = 0
+
+            # Compara a distribuição rotacionada com a frequência do idioma
+            for j in range(26):
+                soma_diferencas += abs(probabilidades[(shift + j) % 26] - freq_idioma[j])
+
+            # Escolhe o shift com menor diferença
+            if soma_diferencas < menor_diferenca:
+                menor_diferenca = soma_diferencas
+                melhor_letra = self.alphabet[shift]
+
+        return melhor_letra
+
+
+    def transformar_chave(self, chave: str) -> str:
+        """Transforma a chave para o formato usado na cifra."""
+
+        if not all(c.upper() in self.alphabet for c in chave):
+            raise ValueError('Chave inválida')
+        if len(chave) > len(texto):
+            return chave[:len(texto)] 
+
+        chave = self.limpar_texto(chave)
+        chave_nova = ""
+        i = 0
+
+        for _ in texto:
+            chave_nova += chave[i]
+            i = (i + 1) % len(chave)
+
+        return chave_nova
+
+
+
+    # FUNÇÕES PRINCIPAIS
     def tamanho_chave(self, texto_cifrado: str, max_key_length: int = 20) -> int:
         """Estima o tamanho da chave usando o método de Kasiski."""
         texto = self.limpar_texto(texto_cifrado)
@@ -62,30 +107,6 @@ class VigenereCifra:
 
         return tamanho_provavel
 
-     def descobrir_letra(self, probabilidades, idioma):
-        melhor_letra = ''
-        menor_diferenca = float('inf')
-
-        if idioma == 'EN':
-            freq_idioma = self.eng_probabilities
-        else:
-            freq_idioma = self.pt_probabilities
-
-        for shift in range(26):
-            soma_diferencas = 0
-
-            # Compara a distribuição rotacionada com a frequência do idioma
-            for j in range(26):
-                soma_diferencas += abs(probabilidades[(shift + j) % 26] - freq_idioma[j])
-
-            # Escolhe o shift com menor diferença
-            if soma_diferencas < menor_diferenca:
-                menor_diferenca = soma_diferencas
-                melhor_letra = self.alphabet[shift]
-
-        return melhor_letra
-
-
 
     def quebra_chave(self, texto_cifrado: str, tamanho_chave: int, idioma: str = 'pt') -> str:
         """Quebra a cifra de Vigenère dado o tamanho da chave."""
@@ -115,24 +136,7 @@ class VigenereCifra:
 
         return palavra_chave
 
-    def transformar_chave(self, chave: str) -> str:
-        """Transforma a chave para o formato usado na cifra."""
 
-        if not all(c.upper() in self.alphabet for c in chave):
-            raise ValueError('Chave inválida')
-        if len(chave) > len(texto):
-            return chave[:len(texto)] 
-
-        chave = self.limpar_texto(chave)
-        chave_nova = ""
-        i = 0
-
-        for _ in texto:
-            chave_nova += chave[i]
-            i = (i + 1) % len(chave)
-
-
-        return chave_nova
     def encriptar_decriptar(self, texto: str, chave: str, opcao: str) -> str:
         """Encripta ou decripta o texto usando a cifra de Vigenère."""
         if opcao in ('ENCRIPTAR', 'DECRIPTAR'):
