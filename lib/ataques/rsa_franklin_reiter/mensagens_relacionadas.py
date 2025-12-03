@@ -151,11 +151,7 @@ def tentativa_de_recuperacao_de_mensagem(c1: int, c2: int, a: int, b: int, e: in
 
     x = symbols('x')
 
-    # Tentamos fazer o gcd sobre coeficientes inteiros (sem modulus).
-    # Usar 'modulus=n' causa problemas quando n é composto (anéis não são campos),
-    # levando a objetos SymmetricModularIntegerMod que não suportam todas as operações
-    # internas do algoritmo de gcd. Portanto construímos os polinômios com coeficientes
-    # inteiros e fazemos o gcd em Z[x].
+
     try:
         f = Poly(x**e - int(c1), x)  # coeficientes inteiros
         g = Poly(expand((a * x + b) ** e - int(c2)), x)
@@ -174,16 +170,15 @@ def tentativa_de_recuperacao_de_mensagem(c1: int, c2: int, a: int, b: int, e: in
         return None  # ataque falhou
 
     # extrair raiz do polinômio linear a*x + b
-    a1, b1 = d.all_coeffs()  # [a1, b1] representando a1*x + b1
+    a1, b1 = d.all_coeffs() 
 
     a1 = a1 % n
     b1 = b1 % n
 
-    # m1 = -b1 * inv(a1) mod n
     try:
         inv_a1 = pow(a1, -1, n)
     except ValueError:
-        return None  # sem inverso (não deveria acontecer no ataque padrão)
+        return None 
 
     m1 = (-b1 * inv_a1) % n
     return m1
