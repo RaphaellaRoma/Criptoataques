@@ -20,14 +20,14 @@ def medir_tempo(func: Callable, *args, repeticoes: int = 1, **kwargs) -> float:
     return sum(tempos) / repeticoes
 
 
-def expansao_tamanho(texto_original: str, texto_cifrado: str) -> float:
+def expansao_tamanho(tam_original: int, tam_cifrado: int) -> float:
     """
-    Quanto maior fica o texto após a cifra.
-    Retorna fator = len(cifrado)/len(original)
+    Calcula o fator de expansão em bytes: tam_cifrado / tam_original.
     """
-    if len(texto_original) == 0:
+    if tam_original == 0:
         return 0
-    return len(texto_cifrado) / len(texto_original)
+    return tam_cifrado / tam_original
+
 
 
 def calcular_avalanche(func_encrypt: Callable, texto: str) -> float:
