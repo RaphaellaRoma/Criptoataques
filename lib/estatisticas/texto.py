@@ -7,15 +7,7 @@ from typing import Dict
 
 from lib.ataques.analise_de_frequencia import (
     contar_frequencias,
-    frequencia_relativa,
 )
-
-
-def entropia(texto: str) -> float:
-    contagens = contar_frequencias(texto) # Retorna um Dict[str, int]
-    freq_rel = frequencia_relativa(contagens) # Retorna um Dict[str, float]
-    
-    return -sum(p * math.log2(p) for p in freq_rel.values() if p > 0)
 
 
 def indice_coincidencia(texto: str) -> float:
