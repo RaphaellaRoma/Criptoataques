@@ -4,6 +4,13 @@ import unicodedata
 import re
 
 class VigenereCifra:
+    """
+    Implementa operações básicas da cifra de Vigenère:
+    - limpeza e normalização de texto
+    - estimativa do tamanho da chave (Kasiski)
+    - quebra automática da chave por análise de frequência
+    - cifrar e decifrar textos
+    """
     def __init__(self):
         self._alfabeto = list(s.ascii_uppercase)
         self._freq_pt = [14.63, 1.04, 3.88, 4.99, 12.57, 1.02, 1.30, 1.28, 6.18, 0.40, 0.02, 2.78, 4.74, 5.05, 10.73, 2.52, 1.20, 6.53, 7.81, 4.34, 4.63, 1.67, 0.01, 0.21, 0.01, 0.47]
@@ -11,6 +18,10 @@ class VigenereCifra:
     
     # Funções auxiliares
     def _normalizar_texto_para_cifrar(self, texto: str) -> str:
+        """
+        Remove acentos e converte o texto para A–Z, mantendo espaços e símbolos.
+        Usado na cifragem/decifragem para preservar pontuação.
+        """
         # remove acentos (Ç→C, Á→A...)
         texto = unicodedata.normalize('NFD', texto)
         texto = texto.encode('ascii', 'ignore').decode('utf-8')
@@ -30,6 +41,11 @@ class VigenereCifra:
         return texto
     
     def _descobrir_letra(self, probabilidades, idioma):
+        """
+        Compara a distribuição de letras da coluna com frequências do idioma
+        para descobrir qual shift corresponde à letra da chave.
+        Retorna uma letra A–Z.
+        """
         melhor_letra = ''
         menor_diferenca = float('inf')
 
@@ -54,6 +70,10 @@ class VigenereCifra:
 
 
     def _transformar_chave(self, texto: str, chave: str) -> str:
+        """
+        Repete a chave até o tamanho do texto,
+        alinhando apenas nas posições que contêm letras A–Z.
+        """
         chave = self._limpar_texto(chave).upper()
 
         nova = ""
@@ -72,7 +92,11 @@ class VigenereCifra:
 
     # FUNÇÕES PRINCIPAIS
     def tamanho_chave(self, texto_cifrado: str, max_key_length: int = 20, verbose=True) -> int:
-        """Estima o tamanho da chave usando o método de Kasiski."""
+        """
+        Estima o tamanho da chave usando o método de Kasiski.
+        Procura repetições de trigramas e vê quais distâncias compartilham divisores.
+        Retorna o tamanho de chave mais provável.
+        """
         texto = self._limpar_texto(texto_cifrado)
 
         pos_trigramas = {}
@@ -110,15 +134,6 @@ class VigenereCifra:
 
             print("\nTamanho provável da chave:", tamanho_provavel)
 
-        # Perguntar ao usuário
-        # ans = input("Você deseja continuar com esse tamanho da chave? (S/N)\n>>> ")
-
-        # if ans.lower() == 'n':
-        #     escolha = int(input(f"Digite o tamanho da chave desejado (entre 4 e {max_key_length}).\n>>> "))
-        #     while escolha < 4 or escolha > max_key_length:
-        #         escolha = int(input(f"Tamanho inválido. Digite um número entre 4 e {max_key_length}.\n>>> "))
-        #     return escolha
-
         return next(iter(freq_divisores_sorted))
 
 
@@ -150,32 +165,13 @@ class VigenereCifra:
 
         return palavra_chave
 
-
-    # def encriptar_decriptar(self, texto: str, chave: str, opcao: str) -> str:
-    #     """Encripta ou decripta o texto usando a cifra de Vigenère."""
-    #     if opcao in ('ENCRIPTAR', 'DECRIPTAR'):
-    #         if len(texto) <= 0 or len(chave) < 3:
-    #             raise ValueError('Tamanho do texto ou da chave inválido')
-    #     else:
-    #         raise ValueError('Opção inválida!')
-
-    #     if opcao != 'ENCRIPTAR' and opcao != 'DECRIPTAR':
-    #         raise ValueError('Opção inválida!')
-    #     texto = self._limpar_texto(texto)
-    #     chave = self._limpar_texto(chave)
-    #     chave_nova = self._transformar_chave(texto, chave)
-
-    #     resultado = ""
-    #     for letra in texto:
-    #         if opcao == 'ENCRIPTAR':
-    #             nova_letra = self._alfabeto[(self._alfabeto.index(letra) + self._alfabeto.index(chave_nova[len(resultado)])) % 26]
-    #         else:
-    #             nova_letra = self._alfabeto[(self._alfabeto.index(letra) - self._alfabeto.index(chave_nova[len(resultado)]) + 26) % 26]
-    #         resultado += nova_letra
-
-    #     return resultado
     
     def encriptar_decriptar(self, texto: str, chave: str, opcao: str) -> str:
+        """
+        Cifra ou decifra um texto usando Vigenère.
+        Mantém espaços e pontuação.
+        Retorna uma string com o resultado.
+        """
         if opcao not in ('cifrar', 'decifrar'):
             raise ValueError('Opção inválida!')
 

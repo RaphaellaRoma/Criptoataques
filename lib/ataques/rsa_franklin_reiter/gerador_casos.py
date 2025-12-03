@@ -4,6 +4,11 @@ from crypto_io.util_io import texto_para_inteiro
 import secrets
 
 def gerar_chaves(bits: int, e_inicial: Optional[int] = None):
+    """
+    Gera chaves RSA.
+    Retorna (n, e, d).
+    bits >= 256 (ideal >= 1024).
+    """
     if bits < 256:
         raise ValueError("bits deve ser >= 256 (use >= 1024).")
 
@@ -15,6 +20,13 @@ def gerar_chaves(bits: int, e_inicial: Optional[int] = None):
 
 
 def gerar_mensagens_relacionadas(n: int, a: Optional[int], b: Optional[int], texto: Optional[str]) -> Tuple[int, int, int, int, Optional[int]]:
+    """
+    Gera m1 e m2 relacionados linearmente:
+        m2 = (a*m1 + b) mod n
+
+    Se texto for passado, m1 vem do texto.
+    Caso contrário, m1 aleatório.
+    """
     # garante a
     if a is None:
         a = secrets.randbelow(n - 1) + 1
@@ -59,6 +71,9 @@ def gerar_mensagens_relacionadas(n: int, a: Optional[int], b: Optional[int], tex
 
 
 def gerar_caso_textos(texto1, texto2, bits=1024, a=None, b=None, encrypt_func=None, e_inicial: Optional[int] = None):
+    """
+    Recebe dois textos e gera m1, m2 relacionados e suas cifras.
+    """
     n, e, d = gerar_chaves(bits, e_inicial=e_inicial)
     m1, nbytes1 = texto_para_inteiro(texto1)
     m2, nbytes2 = texto_para_inteiro(texto2)
@@ -85,6 +100,9 @@ def gerar_caso_textos(texto1, texto2, bits=1024, a=None, b=None, encrypt_func=No
 
 
 def gerar_caso_inteiros(m1, m2, bits=1024, a=None, b=None, encrypt_func=None, e_inicial: Optional[int] = None):
+    """
+    Mesmo que gerar_caso_textos, porém recebe m1 e m2 inteiros.
+    """
     n, e, d = gerar_chaves(bits, e_inicial=e_inicial)
     m1 = m1 % n
     m2 = m2 % n
@@ -108,6 +126,10 @@ def gerar_caso_inteiros(m1, m2, bits=1024, a=None, b=None, encrypt_func=None, e_
 
 
 def gerar_caso_m1(m1=None, texto1=None, bits=1024, a=None, b=None, encrypt_func=None, e_inicial: Optional[int] = None):
+    """
+    Gera um caso onde só m1 é fornecido (inteiro ou texto).
+    Gera m2 = a*m1 + b.
+    """
     n, e, d = gerar_chaves(bits, e_inicial=e_inicial)
     nbytes = None
     if texto1 is not None:
@@ -140,6 +162,10 @@ def gerar_caso_m1(m1=None, texto1=None, bits=1024, a=None, b=None, encrypt_func=
 
 
 def gerar_caso_aleatorio(bits=1024, a=None, b=None, encrypt_func=None, e_inicial: Optional[int] = None):
+    """
+    Gera m1 aleatório e m2 = a*m1 + b.
+    Retorna também as cifras c1 e c2.
+    """
     n, e, d = gerar_chaves(bits, e_inicial=e_inicial)
     m1, m2, a_final, b_final, nbytes = gerar_mensagens_relacionadas(n, a, b, None)
     c1 = rsa_encriptador(m1, (e, n))
@@ -161,6 +187,14 @@ def gerar_caso_aleatorio(bits=1024, a=None, b=None, encrypt_func=None, e_inicial
 
 
 def gerador_caso_relacionado_linear(bits=1024, a=None, b=None, texto1=None, texto2=None, m1=None, m2=None, encrypt_func=None, e_inicial=None):
+    """
+    Função principal que decide qual gerador chamar:
+      - texto1 + texto2 → caso com dois textos
+      - m1 + m2         → caso com inteiros
+      - texto1 sozinho  → caso para m1 textual
+      - m1 sozinho      → caso para m1 inteiro
+      - nenhum dado     → caso aleatório
+    """
     if texto1 is not None and texto2 is not None:
         return gerar_caso_textos(texto1, texto2, bits, a, b, encrypt_func, e_inicial=e_inicial) 
     elif m1 is not None and m2 is not None:

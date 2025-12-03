@@ -8,6 +8,9 @@ from .cipher import (
 
 
 def ler_arquivo_texto(caminho: str) -> str:
+    """
+    Lê o conteúdo de um arquivo de texto codificado em UTF-8.
+    """
     try:
         with open(caminho, "r", encoding="utf-8") as f:
             return f.read()
@@ -28,6 +31,9 @@ def imprimir_resultados(resultados: Dict[str, str]) -> None:
 
 
 def montar_parser() -> argparse.ArgumentParser:
+    """
+    Cria e configura o analisador de argumentos da CLI.
+    """
     parser = argparse.ArgumentParser(
         description="Ferramenta de linha de comando para a Cifra de César."
     )
@@ -68,6 +74,9 @@ def montar_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Optional[list[str]] = None) -> None:
+    """
+    Função principal da ferramenta de linha de comando.
+    """
     parser = montar_parser()
     args = parser.parse_args(argv)
 
