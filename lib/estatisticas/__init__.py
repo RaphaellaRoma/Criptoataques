@@ -16,6 +16,10 @@ from .texto import (
     contar_frequencias,
     indice_coincidencia,
     tamanho_bytes,
+    entropia, 
+    autocorrelacao,
+    matriz_coocorrencia,
+    gerar_dados_cripto_graficos,
 )
 
 __all__ = [
@@ -27,4 +31,8 @@ __all__ = [
     "frequencia_relativa",
     "indice_coincidencia",
     "tamanho_bytes",
+    "entropia",
+    "autocorrelacao"
+    "matriz_coocorrencia"
+    "gerar_dados_cripto_graficos",
 ]
