@@ -30,12 +30,20 @@ def expandir_relacao_linear(a: int, b: int, e: int, c: int, n: int | None = None
     coefs = [0] * (e + 1)
 
     for k in range(e + 1):
+        # A base 'a' deve ser reduzida se n estiver definido.
+
+        # a^k mod n
+        ak = pow(a, k, n) if n is not None else (a ** k)
+        
+        # b^(e-k) mod n
+        bek = pow(b, e - k, n) if n is not None else (b ** (e - k))
+        
         # expansão do binômio: (a*m1 + b)^e = soma(k=0 até e) [comb(e,k) * (a*m1)^k * b^(e-k)]
-        # como estamos construindo o polinômio em m1, o coeficiente do termo m1^k é:
-        coef = comb(e, k) * (a ** k) * (b ** (e - k))
+        # como estamos construindo o polinômio em m1, o coeficiente do termo m1^k é:  
+        coef = comb(e, k) * ak * bek 
 
         if n is not None:
-            coef %= n
+            coef %= n 
 
         coefs[k] = coef
 
