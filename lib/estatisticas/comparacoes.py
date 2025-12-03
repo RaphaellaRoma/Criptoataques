@@ -3,7 +3,7 @@ Ferramentas para comparar vários algoritmos em vários textos.
 """
 
 from typing import Dict, Callable, List
-from .texto import entropia, indice_coincidencia
+from .texto import indice_coincidencia
 from .algoritmos import medir_tempo, expansao_tamanho, calcular_avalanche
 
 
@@ -26,8 +26,7 @@ def comparar_algoritmos(textos: Dict[str, str], algoritmos: Dict[str, Dict[str, 
             resultados[nome_alg][nome_txt] = {
                 "tamanho": tamanho_bytes,
                 "tempo_cifra": medir_tempo(func_cifrar, texto, repeticoes=5),
-                "tempo_decifra": medir_tempo(func_decifrar, cifrado, repeticoes=5), # Mede a decifragem do texto cifrado
-                "entropia": entropia(cifrado),
+                "tempo_decifra": medir_tempo(func_decifrar, cifrado, repeticoes=5),
                 "IC": indice_coincidencia(cifrado),
                 "expansao": expansao_tamanho(texto, cifrado),
                 "avalanche": calcular_avalanche(func_cifrar, texto),

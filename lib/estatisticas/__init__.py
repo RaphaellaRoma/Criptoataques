@@ -14,8 +14,6 @@ from .comparacoes import comparar_algoritmos
 
 from .texto import (
     contar_frequencias,
-    frequencia_relativa,
-    entropia,
     indice_coincidencia,
     tamanho_bytes,
 )
@@ -27,7 +25,6 @@ __all__ = [
     "comparar_algoritmos",
     "contar_frequencias",
     "frequencia_relativa",
-    "entropia",
     "indice_coincidencia",
     "tamanho_bytes",
 ]
