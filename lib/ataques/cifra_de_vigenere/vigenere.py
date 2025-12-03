@@ -71,7 +71,7 @@ class VigenereCifra:
 
 
     # FUNÇÕES PRINCIPAIS
-    def tamanho_chave(self, texto_cifrado: str, max_key_length: int = 20) -> int:
+    def tamanho_chave(self, texto_cifrado: str, max_key_length: int = 20, verbose=True) -> int:
         """Estima o tamanho da chave usando o método de Kasiski."""
         texto = self._limpar_texto(texto_cifrado)
 
@@ -101,14 +101,14 @@ class VigenereCifra:
                     freq_divisores[div] += 1
 
         freq_divisores_sorted = dict(sorted(freq_divisores.items(), key=lambda x: x[1], reverse=True))
+        if verbose:
+            print("Tamanhos de chave possíveis (ordenados por frequência):")
+            for tamanho, qtd in freq_divisores_sorted.items():
+                print(f"Tamanho: {tamanho} -- Quantidade: {qtd}")
 
-        print("Tamanhos de chave possíveis (ordenados por frequência):")
-        for tamanho, qtd in freq_divisores_sorted.items():
-            print(f"Tamanho: {tamanho} -- Quantidade: {qtd}")
+            tamanho_provavel = next(iter(freq_divisores_sorted))
 
-        tamanho_provavel = next(iter(freq_divisores_sorted))
-
-        print("\nTamanho provável da chave:", tamanho_provavel)
+            print("\nTamanho provável da chave:", tamanho_provavel)
 
         # Perguntar ao usuário
         # ans = input("Você deseja continuar com esse tamanho da chave? (S/N)\n>>> ")
@@ -119,7 +119,7 @@ class VigenereCifra:
         #         escolha = int(input(f"Tamanho inválido. Digite um número entre 4 e {max_key_length}.\n>>> "))
         #     return escolha
 
-        # return tamanho_provavel
+        return next(iter(freq_divisores_sorted))
 
 
     def quebra_chave(self, texto_cifrado: str, tamanho_chave: int, idioma: str = 'pt') -> str:
