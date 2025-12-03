@@ -15,7 +15,20 @@ class VigenereCifra:
         texto = unicodedata.normalize('NFD', texto)
         texto = texto.encode('ascii', 'ignore').decode('utf-8')
         return texto.upper()
+    
+    def _limpar_texto(self, texto: str) -> str:
+        """Remove caracteres não alfabéticos e converte para maiúsculas."""
+        
+        # Normaliza acentos (É → E, Ç → C, Ã → A...)
+        texto = unicodedata.normalize('NFD', texto)
+        texto = texto.encode('ascii', 'ignore').decode('utf-8')
 
+        # Agora deixa só A–Z
+        texto = texto.upper()
+        texto = re.sub(r'[^A-Z]', '', texto)
+
+        return texto
+    
     def _descobrir_letra(self, probabilidades, idioma):
         melhor_letra = ''
         menor_diferenca = float('inf')
@@ -163,7 +176,7 @@ class VigenereCifra:
     #     return resultado
     
     def encriptar_decriptar(self, texto: str, chave: str, opcao: str) -> str:
-        if opcao not in ('ENCRIPTAR', 'DECRIPTAR'):
+        if opcao not in ('cifrar', 'decifrar'):
             raise ValueError('Opção inválida!')
 
         if len(texto) <= 0 or len(chave) < 4:
@@ -182,7 +195,7 @@ class VigenereCifra:
                 pos_letra = self._alfabeto.index(letra)
                 pos_chave = self._alfabeto.index(k)
 
-                if opcao == 'ENCRIPTAR':
+                if opcao == 'cifrar':
                     nova = self._alfabeto[(pos_letra + pos_chave) % 26]
                 else:
                     nova = self._alfabeto[(pos_letra - pos_chave + 26) % 26]
