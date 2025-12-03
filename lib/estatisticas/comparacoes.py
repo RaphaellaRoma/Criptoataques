@@ -14,7 +14,6 @@ def comparar_algoritmos(textos: Dict[str, str], algoritmos: Dict[str, Dict[str, 
         resultados[nome_alg] = {}
 
         for nome_txt, texto in textos.items():
-
             # tempo
             start = time.perf_counter()
             cifrado = funcs["cifrar"](texto)
@@ -41,5 +40,6 @@ def comparar_algoritmos(textos: Dict[str, str], algoritmos: Dict[str, Dict[str, 
                 "autocorrelacao": dados_graf["autocorrelacao"],
                 "coocorrencia": dados_graf["coocorrencia"],
             }
+            print(f"processado:{nome_alg,nome_txt}")
 
     return resultados
