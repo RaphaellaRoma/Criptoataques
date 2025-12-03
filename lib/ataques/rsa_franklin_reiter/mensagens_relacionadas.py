@@ -27,27 +27,38 @@ def expandir_relacao_linear(a: int, b: int, e: int, c: int, n: int | None = None
         list[int]: coeficientes do polinômio.
     """
 
+    # coercões de tipo (pode vir SymPy ou outro tipo numérico)
+    try:
+        e = int(e)
+    except Exception:
+        raise TypeError("Expoente 'e' não é um inteiro válido.")
+
+    if e < 0:
+        raise ValueError("Expoente 'e' deve ser não-negativo.")
+
+    # evita tentativas de alocar listas gigantescas por segurança
+    if e > 1_000_000:
+        raise ValueError("Expoente 'e' muito grande para expandir o polinômio.")
+
     coefs = [0] * (e + 1)
 
     for k in range(e + 1):
-        # A base 'a' deve ser reduzida se n estiver definido.
+        # coerciona a/b para int antes de operações repetidas
+        if k == 0:
+            a_int = int(a)
+            b_int = int(b)
+        ak = pow(int(a_int), k, n) if n is not None else (int(a_int) ** k)
 
-        # a^k mod n
-        if n is None:
-            raise ValueError("Módulo n não pode ser None em aritmética modular.")
-        ak = pow(a, k, n)
-        
         # b^(e-k) mod n
-        bek = pow(b, e - k, n) if n is not None else (b ** (e - k))
+        bek = pow(int(b_int), e - k, n) if n is not None else (int(b_int) ** (e - k))
         
         # expansão do binômio: (a*m1 + b)^e = soma(k=0 até e) [comb(e,k) * (a*m1)^k * b^(e-k)]
         # como estamos construindo o polinômio em m1, o coeficiente do termo m1^k é:  
-        coef = comb(e, k) * ak * bek 
-
+        coef = comb(e, k) * ak * bek
         if n is not None:
-            coef %= n 
+            coef %= int(n)
 
-        coefs[k] = coef
+        coefs[k] = int(coef)
 
     # subtrai a cifra do termo constante
     if n is None:
@@ -58,7 +69,7 @@ def expandir_relacao_linear(a: int, b: int, e: int, c: int, n: int | None = None
     return coefs
 
 
-def construir_polinomio_para_cifra(e: int, c1: int, a: int, b: int, c2: int) -> tuple[list[int], list[int]]:
+def construir_polinomio_para_cifra(e: int, c1: int, a: int, b: int, c2: int, n: int | None = None) -> tuple[list[int], list[int]]:
     """
     Constrói dois polinômios usados no ataque Franklin–Reiter:
 
@@ -81,12 +92,17 @@ def construir_polinomio_para_cifra(e: int, c1: int, a: int, b: int, c2: int) -> 
         raise ValueError("e deve ser inteiro positivo.")
 
     # f(x)
-    f_coefs = [0] * (e + 1)
+    # garantimos que e seja inteiro aqui também
+    try:
+        e_int = int(e)
+    except Exception:
+        raise TypeError("Expoente 'e' inválido no construtor de polinômios.")
+    f_coefs = [0] * (e_int + 1)
     f_coefs[0] = -c1
-    f_coefs[e] = 1
+    f_coefs[e_int] = 1
 
     # g(x)
-    g_coefs = expandir_relacao_linear(a, b, e, c2, n)
+    g_coefs = expandir_relacao_linear(a, b, e_int, c2, n)
 
     return f_coefs, g_coefs
 
@@ -125,7 +141,7 @@ def construir_polinomio_de_relacao(a: int, b: int, e: int, c: int, n: int) -> li
 #     return None
 
 
-from sympy import symbols, Poly, gcd
+from sympy import symbols, Poly, gcd, expand
 
 def tentativa_de_recuperacao_de_mensagem(c1: int, c2: int, a: int, b: int, e: int, n: int) -> int | None:
     """
@@ -135,14 +151,23 @@ def tentativa_de_recuperacao_de_mensagem(c1: int, c2: int, a: int, b: int, e: in
 
     x = symbols('x')
 
-    # f(x) = x^e - c1
-    f = Poly(x**e - c1, x, modulus=n)
+    # Tentamos fazer o gcd sobre coeficientes inteiros (sem modulus).
+    # Usar 'modulus=n' causa problemas quando n é composto (anéis não são campos),
+    # levando a objetos SymmetricModularIntegerMod que não suportam todas as operações
+    # internas do algoritmo de gcd. Portanto construímos os polinômios com coeficientes
+    # inteiros e fazemos o gcd em Z[x].
+    try:
+        f = Poly(x**e - int(c1), x)  # coeficientes inteiros
+        g = Poly(expand((a * x + b) ** e - int(c2)), x)
 
-    # g(x) = (a*x + b)**e - c2
-    g = Poly((a*x + b)**e - c2, x, modulus=n)
-
-    # gcd polinomial
-    d = gcd(f, g)
+        # gcd polinomial sobre Z[x]
+        d = gcd(f, g)
+    except Exception:
+        # Se algo der errado com coeficientes inteiros, tentamos fallback usando
+        # o método modular (com risco de falha quando n é composto).
+        f = Poly(x**e - int(c1), x, modulus=n)
+        g = Poly((a * x + b) ** e - int(c2), x, modulus=n)
+        d = gcd(f, g)
 
     # gcd deve ser linear: x - m1
     if d.degree() != 1:
