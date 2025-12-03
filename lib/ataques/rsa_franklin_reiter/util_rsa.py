@@ -16,12 +16,13 @@ def generate_prime(bits: int):
             return p
 
 
-def generate_rsa_keypair(bits: int = 16):
+def generate_rsa_keypair(bits: int = 16, e_inicial: int | None = None):
     """
-    Gera um par de chaves RSA pequenas (para fins didáticos).
-    Retorna:
-      public_key = (e, N)
-      private_key = (d, p, q)
+    Gera um par de chaves RSA.
+    
+    Args:
+        bits: Tamanho da chave (em bits).
+        e_inicial: Expoente público a ser usado. Se None, usa 65537.
     """
     # Gera dois primos distintos
     p = generate_prime(bits)
@@ -32,11 +33,11 @@ def generate_rsa_keypair(bits: int = 16):
     N = p * q
     phi = (p - 1) * (q - 1)
 
-    # Escolhe expoente público (e)
-    e = 65537  # valor padrão comum
+    e = e_inicial if e_inicial is not None else 65537 
+
     g, _, _ = egcd(e, phi)
     if g != 1:
-        # se 65537 não for coprimo, tenta outro
+        print(f"Aviso: O expoente e={e} não é coprimo de phi. Gerando um novo...")
         while True:
             e = random.randrange(3, phi, 2)
             g, _, _ = egcd(e, phi)
