@@ -33,7 +33,9 @@ def expandir_relacao_linear(a: int, b: int, e: int, c: int, n: int | None = None
         # A base 'a' deve ser reduzida se n estiver definido.
 
         # a^k mod n
-        ak = pow(a, k, n) if n is not None else (a ** k)
+        if n is None:
+            raise ValueError("Módulo n não pode ser None em aritmética modular.")
+        ak = pow(a, k, n)
         
         # b^(e-k) mod n
         bek = pow(b, e - k, n) if n is not None else (b ** (e - k))
@@ -111,19 +113,13 @@ def construir_polinomio_de_relacao(a: int, b: int, e: int, c: int, n: int) -> li
 
 
 def tentativa_de_recuperacao_de_mensagem(polinomio: list[int], n: int) -> int | None: 
-    """ 
+    """
     Tenta recuperar a mensagem m1 a partir do polinômio construído. 
     Procura raízes inteiras do polinômio no intervalo [0, n-1]. 
-    
-    Arguments: 
-        polinomio: lista de coeficientes do polinômio 
-        n: módulo RSA 
-        
-    Returns: 
-        int | None: A mensagem m1 se encontrada, caso contrário None 
-    """ 
-    
+
+    """
+
     for m1 in range(n): 
-        if poly_eval(polinomio, m1) % n == 0: 
+        if poly_eval(polinomio, m1, n) == 0: 
             return m1 
     return None
