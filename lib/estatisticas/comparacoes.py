@@ -36,10 +36,8 @@ def comparar_algoritmos(textos: Dict[str, str], algoritmos: Dict[str, Dict[str, 
                 "avalanche": calcular_avalanche(funcs["cifrar"], texto),
                 "entropia": entropia(cifrado),
 
-                "autocorrelacao": dados_graf["autocorrelacao"],
                 "coocorrencia": dados_graf["coocorrencia"],
                 "autocorrelacao_normalizada": dados_graf["autocorrelacao_normalizada"],
-                "coocorrencia_centralizada": dados_graf["coocorrencia_centralizada"],
                 "mapa_original_cifrada": dados_graf["mapa_original_cifrada"]
             }
 

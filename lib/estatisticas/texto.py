@@ -37,24 +37,7 @@ def tamanho_bytes(texto: str, encoding: str = "utf-8") -> int:
     return len(texto.encode(encoding))
 
 
-def autocorrelacao(texto: str, max_shift: int = 50):
-    """
-    Retorna lista com autocorrelação para cada shift k.
-    """
-    texto = texto.upper()
-    nums = [ord(c) - 65 for c in texto if 'A' <= c <= 'Z']
-    n = len(nums)
-
-    R = []
-    for k in range(1, max_shift + 1):
-        limite = n - k
-        coincid = sum(1 for i in range(limite) if nums[i] == nums[i+k])
-        R.append(coincid)
-
-    return R
-
-
-def matriz_coocorrencia(texto: str, shift: int = 5):
+def matriz_coocorrencia(texto: str, shift: int = 1):
     """
     Retorna uma matriz 26x26 onde M[a][b] é a frequência de
     letra a seguida de letra b após shift.
@@ -71,8 +54,6 @@ def matriz_coocorrencia(texto: str, shift: int = 5):
         M[a][b] += 1
 
     return M
-
-
 
 
 def autocorrelacao_normalizada(texto: str, max_shift: int = 50):
@@ -92,27 +73,7 @@ def autocorrelacao_normalizada(texto: str, max_shift: int = 50):
         R.append(coincid / esperado if esperado > 0 else 0)
 
     return R
-def matriz_coocorrencia_centralizada(texto: str, shift: int = 1):
-    texto = texto.upper()
-    nums = [ord(c) - 65 for c in texto if 'A' <= c <= 'Z']
-    n = len(nums)
 
-    M = np.zeros((26, 26))
-
-    for i in range(n - shift):
-        M[nums[i], nums[i + shift]] += 1
-
-    if M.sum() == 0:
-        return M
-
-    # normaliza para probabilidades
-    P = M / M.sum()
-
-    # centraliza subtraindo produto das marginais
-    px = P.sum(axis=1).reshape(26, 1)
-    py = P.sum(axis=0).reshape(1, 26)
-
-    return P- px @ py
 
 def matriz_original_vs_cifrada(texto_claro: str, texto_cifrado: str):
     """
@@ -142,14 +103,8 @@ def gerar_dados_cripto_graficos(texto_original: str, fun_cifrar, max_shift=50):
     dados = {
         "texto_claro": texto_original,
         "cifrado": cifrado,
-
-        # --- antigas ---
-        "autocorrelacao": autocorrelacao(cifrado, max_shift=max_shift),
         "coocorrencia": matriz_coocorrencia(cifrado, shift=1),
-
-        # --- novas ---
         "autocorrelacao_normalizada": autocorrelacao_normalizada(cifrado, max_shift=max_shift),
-        "coocorrencia_centralizada": matriz_coocorrencia_centralizada(cifrado, shift=1),
         "mapa_original_cifrada": matriz_original_vs_cifrada(texto_original, cifrado),
     }
 
