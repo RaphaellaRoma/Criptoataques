@@ -10,7 +10,7 @@ import sys
 # adiciona o diretório raiz ao PYTHONPATH
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from examples.rsa_franklin_reiter.gerador_casos import gerador_caso_relacionado_linear
+from lib.ataques.rsa_franklin_reiter.gerador_casos import gerador_caso_relacionado_linear
 from crypto_io.util_io import texto_para_inteiro, inteiro_para_texto
 
 def test_gerador_retorna_campos_basicos():
