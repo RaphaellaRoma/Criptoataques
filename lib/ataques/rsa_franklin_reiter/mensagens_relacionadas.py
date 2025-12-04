@@ -4,7 +4,7 @@
 - Stephany: tentar_recuperar_mensagem
 """
 from math import comb
-from sympy import symbols, Poly, expand
+from sympy import symbols, Poly, gcd, expand
 from lib.ataques.rsa_franklin_reiter.polynomial import poly_eval
 
 def expandir_relacao_linear(a: int, b: int, e: int, c: int, n: int | None = None) -> list[int]:
@@ -127,21 +127,6 @@ def construir_polinomio_de_relacao(a: int, b: int, e: int, c: int, n: int) -> li
 
     return expandir_relacao_linear(a, b, e, c, n)
 
-
-# def tentativa_de_recuperacao_de_mensagem(polinomio: list[int], n: int) -> int | None: 
-#     """
-#     Tenta recuperar a mensagem m1 a partir do polinômio construído. 
-#     Procura raízes inteiras do polinômio no intervalo [0, n-1]. 
-
-#     """
-
-#     for m1 in range(n): 
-#         if poly_eval(polinomio, m1, n) == 0: 
-#             return m1 
-#     return None
-
-
-from sympy import symbols, Poly, gcd, expand
 
 def tentativa_de_recuperacao_de_mensagem(c1: int, c2: int, a: int, b: int, e: int, n: int) -> int | None:
     """

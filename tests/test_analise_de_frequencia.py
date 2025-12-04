@@ -17,7 +17,6 @@ from lib.ataques.analise_de_frequencia import (
     FREQ_PT,
     FREQ_EN,
     score_chi_quadrado,
-    score_phi_quadrado,
 )
 
 
@@ -104,19 +103,7 @@ def test_score_chi_quadrado_zero_para_iguais():
     assert score_chi_quadrado(obs, ref) == pytest.approx(0.0)
 
 
-def test_score_phi_quadrado_zero_para_iguais():
-    obs = {"A": 0.5, "B": 0.5}
-    ref = {"A": 0.5, "B": 0.5}
-    assert score_phi_quadrado(obs, ref) == pytest.approx(0.0)
-
-
 def test_score_chi_quadrado_maior_para_diferencas():
     obs = {"A": 1.0, "B": 0.0}
     ref = {"A": 0.5, "B": 0.5}
     assert score_chi_quadrado(obs, ref) > 0
-
-
-def test_score_phi_quadrado_maior_para_diferencas():
-    obs = {"A": 1.0, "B": 0.0}
-    ref = {"A": 0.5, "B": 0.5}
-    assert score_phi_quadrado(obs, ref) > 0
