@@ -1,6 +1,7 @@
 from .cipher import decifrar
 from lib.ataques.analise_de_frequencia import contar_frequencias, frequencia_relativa, score_chi_quadrado, FREQ_PT
 from crypto_io import normalizar_texto
+from typing import Dict, List, Tuple
 
 
 def ataque_cesar(texto_cifrado: str) -> dict:

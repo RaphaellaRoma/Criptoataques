@@ -1,11 +1,6 @@
 import unicodedata
 
-
 def remover_acentos(texto: str) -> str:
-    """
-    Converte letras acentuadas em suas versões sem acento.
-    """
-
     return ''.join(
         c for c in unicodedata.normalize('NFD', texto)
         if unicodedata.category(c) != 'Mn'
@@ -14,31 +9,29 @@ def remover_acentos(texto: str) -> str:
 
 def somente_letras(texto: str, alfabeto: str) -> str:
     """
-    Remove tudo que não está no alfabeto indicado.
+    Remove tudo que não está no alfabeto indicado. 
+    Usada para limpar o texto antes da análise de frequência.
     """
+    
+    texto_processado = remover_acentos(texto.upper())
+    alfabeto_processado = remover_acentos(alfabeto.upper())
 
-    texto = remover_acentos(texto.upper())
-    alfabeto = remover_acentos(alfabeto.upper())
-
-    return ''.join(c for c in texto if c in alfabeto)
+    return ''.join(c for c in texto_processado if c in alfabeto_processado)
 
 
-ALFABETO_PADRAO = "abcdefghijklmnopqrstuvwxyz"
+ALFABETO_PADRAO = "ABCDEFGHIJKLMNOPQRSTUVWXyZ"
 
 def normalizar_texto(texto, alfabeto=ALFABETO_PADRAO, remover_espacos=False) -> str:
     """
-    Normaliza texto:
+    Normaliza texto para uso geral (mantém pontuação e caracteres não-alfabéticos).
     - caixa alta
     - converte acentuadas em não-acentuadas
-    - filtra caracteres usando o alfabeto
-    - remove espaços (opcional)
+    - **NÃO FILTRA caracteres não-alfabéticos**
     """
     
-    texto = remover_acentos(texto.upper())
+    texto_processado = remover_acentos(texto.upper())
 
     if remover_espacos:
-        texto = texto.replace(' ', '')
+        texto_processado = texto_processado.replace(' ', '')
 
-    texto = somente_letras(texto, alfabeto)
-
-    return texto
+    return texto_processado
