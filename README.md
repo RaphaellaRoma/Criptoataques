@@ -23,7 +23,7 @@ O objetivo deste trabalho é compreender não apenas a matemática dos algoritmo
 
 - Reproduzir técnicas de criptoanálise usadas, por exemplo, por Al-Kindi, Babbage e Shannon.
 
-- Aplicar o algoritmo RSA () e compará-lo com os algoritmos mais antigos de criptografia.
+- Aplicar o algoritmo RSA e compará-lo com os algoritmos mais antigos de criptografia.
 
 <br>
 
