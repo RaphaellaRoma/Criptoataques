@@ -1,4 +1,4 @@
-def is_alpha_char(c: str, alfabeto: str = "abcdefghijklmnopqrstuvwxyz") -> bool:
+def is_alpha_char(c: str, alfabeto: str = "ABCDEFGHIJKLMNOPQRSTUVWXyZ") -> bool:
     """Retorna True se o caractere `c` pertence ao `alfabeto`.
 
     >>> is_alpha_char('a')
@@ -11,7 +11,7 @@ def is_alpha_char(c: str, alfabeto: str = "abcdefghijklmnopqrstuvwxyz") -> bool:
     return c in alfabeto
 
 
-def normalizar_chave(chave: int, alfabeto: str = "abcdefghijklmnopqrstuvwxyz") -> int:
+def normalizar_chave(chave: int, alfabeto: str = "ABCDEFGHIJKLMNOPQRSTUVWXyZ") -> int:
     """Normaliza `chave` para estar dentro do intervalo do tamanho do alfabeto.
 
     >>> normalizar_chave(27, 'abc')
@@ -25,7 +25,7 @@ def normalizar_chave(chave: int, alfabeto: str = "abcdefghijklmnopqrstuvwxyz") -
     return chave % n
 
 
-def cifrar(texto: str, chave: int, alfabeto: str = "abcdefghijklmnopqrstuvwxyz") -> str:
+def cifrar(texto: str, chave: int, alfabeto: str = "ABCDEFGHIJKLMNOPQRSTUVWXyZ") -> str:
     """Aplica a cifra de César sobre `texto` usando deslocamento positivo `chave`.
 
     Caracteres não pertencentes ao alfabeto são mantidos inalterados.
@@ -37,6 +37,7 @@ def cifrar(texto: str, chave: int, alfabeto: str = "abcdefghijklmnopqrstuvwxyz")
     >>> cifrar('ola mundo', 1)
     'pmb nvoep'
     """
+    texto = texto.upper()
     chave = normalizar_chave(chave, alfabeto)
     resultado = []
     for c in texto:
@@ -49,7 +50,7 @@ def cifrar(texto: str, chave: int, alfabeto: str = "abcdefghijklmnopqrstuvwxyz")
     return ''.join(resultado)
 
 
-def decifrar(texto: str, chave: int, alfabeto: str = "abcdefghijklmnopqrstuvwxyz") -> str:
+def decifrar(texto: str, chave: int, alfabeto: str = "ABCDEFGHIJKLMNOPQRSTUVWXyZ") -> str:
     """Desfaz a cifra de César aplicada com `chave`.
 
     >>> decifrar('def', 3)
@@ -57,5 +58,7 @@ def decifrar(texto: str, chave: int, alfabeto: str = "abcdefghijklmnopqrstuvwxyz
     >>> decifrar('pmb nvoep', 1)
     'ola mundo'
     """
+    texto = texto.upper()
+    texto = texto.replace("\\n", "\n")
     chave = normalizar_chave(chave, alfabeto)
     return cifrar(texto, -chave, alfabeto)
