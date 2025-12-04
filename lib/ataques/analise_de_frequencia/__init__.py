@@ -15,7 +15,6 @@ from .perfis_linguisticos import (
 )
 from .similaridade import (
     score_chi_quadrado,
-    score_phi_quadrado,
 )
 
 __all__ = [
@@ -25,5 +24,4 @@ __all__ = [
     "FREQ_PT",
     "FREQ_EN",
     "score_chi_quadrado",
-    "score_phi_quadrado",
 ]
