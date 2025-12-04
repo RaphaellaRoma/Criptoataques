@@ -5,16 +5,13 @@ from .algoritmos import medir_tempo, expansao_tamanho, calcular_avalanche
 
 
 def comparar_algoritmos(textos: Dict[str, str], algoritmos: Dict[str, Dict[str, Callable]], max_shift_auto: int = 50):
-    """
-    Compara tempo de cifragem/decifragem e métricas de criptoanálise para vários algoritmos e textos.
-    """
     resultados = {}
 
     for nome_alg, funcs in algoritmos.items():
         resultados[nome_alg] = {}
 
         for nome_txt, texto in textos.items():
-            # tempo
+            # tempos
             start = time.perf_counter()
             cifrado = funcs["cifrar"](texto)
             tempo_cifra = time.perf_counter() - start
@@ -24,7 +21,7 @@ def comparar_algoritmos(textos: Dict[str, str], algoritmos: Dict[str, Dict[str, 
 
             tamanho_bytes = len(texto.encode('utf-8'))
 
-            # numeros matriz
+            # dados gráficos (todas as matrizes)
             dados_graf = gerar_dados_cripto_graficos(texto, funcs["cifrar"], max_shift_auto)
 
             resultados[nome_alg][nome_txt] = {
@@ -33,13 +30,19 @@ def comparar_algoritmos(textos: Dict[str, str], algoritmos: Dict[str, Dict[str, 
                 "tempo_decifra": tempo_decifra,
                 "tempo_ataque": tempo_ataque,
 
+                # métricas clássicas
                 "IC": indice_coincidencia(cifrado),
                 "expansao": expansao_tamanho(len(texto), len(cifrado)),
                 "avalanche": calcular_avalanche(funcs["cifrar"], texto),
                 "entropia": entropia(cifrado),
+
                 "autocorrelacao": dados_graf["autocorrelacao"],
                 "coocorrencia": dados_graf["coocorrencia"],
+                "autocorrelacao_normalizada": dados_graf["autocorrelacao_normalizada"],
+                "coocorrencia_centralizada": dados_graf["coocorrencia_centralizada"],
+                "mapa_original_cifrada": dados_graf["mapa_original_cifrada"]
             }
-            print(f"processado:{nome_alg,nome_txt}")
+
+            print(f"processado: {nome_alg, nome_txt}")
 
     return resultados

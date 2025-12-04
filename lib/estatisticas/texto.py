@@ -5,6 +5,7 @@ Funções para análise estatística geral de textos.
 import math
 from typing import Dict
 from collections import Counter
+import numpy as np
 
 from lib.ataques.analise_de_frequencia import (
     contar_frequencias,
@@ -53,7 +54,7 @@ def autocorrelacao(texto: str, max_shift: int = 50):
     return R
 
 
-def matriz_coocorrencia(texto: str, shift: int = 1):
+def matriz_coocorrencia(texto: str, shift: int = 5):
     """
     Retorna uma matriz 26x26 onde M[a][b] é a frequência de
     letra a seguida de letra b após shift.
@@ -72,21 +73,84 @@ def matriz_coocorrencia(texto: str, shift: int = 1):
     return M
 
 
+
+
+def autocorrelacao_normalizada(texto: str, max_shift: int = 50):
+    texto = texto.upper()
+    nums = [ord(c) - 65 for c in texto if 'A' <= c <= 'Z']
+    n = len(nums)
+
+    R = []
+    for k in range(1, max_shift + 1):
+        limite = n - k
+        coincid = sum(nums[i] == nums[i+k] for i in range(limite))
+
+        # valor esperado se fosse completamente aleatório
+        esperado = limite * (1/26)
+
+        # normalização para evidenciar dependência
+        R.append(coincid / esperado if esperado > 0 else 0)
+
+    return R
+def matriz_coocorrencia_centralizada(texto: str, shift: int = 1):
+    texto = texto.upper()
+    nums = [ord(c) - 65 for c in texto if 'A' <= c <= 'Z']
+    n = len(nums)
+
+    M = np.zeros((26, 26))
+
+    for i in range(n - shift):
+        M[nums[i], nums[i + shift]] += 1
+
+    if M.sum() == 0:
+        return M
+
+    # normaliza para probabilidades
+    P = M / M.sum()
+
+    # centraliza subtraindo produto das marginais
+    px = P.sum(axis=1).reshape(26, 1)
+    py = P.sum(axis=0).reshape(1, 26)
+
+    return P- px @ py
+
+def matriz_original_vs_cifrada(texto_claro: str, texto_cifrado: str):
+    """
+    Retorna matriz 26x26 onde M[c][p] conta quantas vezes
+    a letra p do plaintext virou letra c no ciphertext.
+    """
+    texto_claro = texto_claro.upper()
+    texto_cifrado = texto_cifrado.upper()
+
+    nums_p = [ord(c) - 65 for c in texto_claro if 'A' <= c <= 'Z']
+    nums_c = [ord(c) - 65 for c in texto_cifrado if 'A' <= c <= 'Z']
+
+    n = min(len(nums_p), len(nums_c))
+    M = [[0] * 26 for _ in range(26)]
+
+    for i in range(n):
+        p = nums_p[i]
+        c = nums_c[i]
+        M[c][p] += 1
+
+    return M
+
+
 def gerar_dados_cripto_graficos(texto_original: str, fun_cifrar, max_shift=50):
-    """
-    Gera:
-        - texto cifrado
-        - autocorrelação (lista)
-        - coocorrência (matriz 26x26, shift 1)
-    """
-    
     cifrado = fun_cifrar(texto_original)
 
     dados = {
         "texto_claro": texto_original,
         "cifrado": cifrado,
+
+        # --- antigas ---
         "autocorrelacao": autocorrelacao(cifrado, max_shift=max_shift),
-        "coocorrencia": matriz_coocorrencia(cifrado, shift=1)
+        "coocorrencia": matriz_coocorrencia(cifrado, shift=1),
+
+        # --- novas ---
+        "autocorrelacao_normalizada": autocorrelacao_normalizada(cifrado, max_shift=max_shift),
+        "coocorrencia_centralizada": matriz_coocorrencia_centralizada(cifrado, shift=1),
+        "mapa_original_cifrada": matriz_original_vs_cifrada(texto_original, cifrado),
     }
 
     return dados

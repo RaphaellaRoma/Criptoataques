@@ -25,20 +25,3 @@ def score_chi_quadrado(freq_obs: Dict[str, float], freq_esp: Dict[str, float]) -
             chi2 += ((observado - esperado) ** 2) / esperado
     
     return chi2
-
-
-def score_phi_quadrado(freq_obs: Dict[str, float], freq_esp: Dict[str, float]) -> float:
-    """Calcula o score phi-quadrado entre frequências observadas e esperadas.
-    
-    Semelhante ao chi-quadrado, mas normalizado.
-    Valores menores indicam maior similaridade.
-    
-    Args:
-        freq_obs: Dicionário com frequências relativas observadas
-        freq_esp: Dicionário com frequências relativas esperadas
-    
-    Returns:
-        Score phi-quadrado normalizado
-    """
-    chi2 = score_chi_quadrado(freq_obs, freq_esp)
-    return chi2 / len(freq_esp)
