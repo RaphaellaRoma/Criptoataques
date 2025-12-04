@@ -17,14 +17,10 @@ from .texto import (
     indice_coincidencia,
     tamanho_bytes,
     entropia, 
-    autocorrelacao,
     matriz_coocorrencia,
     gerar_dados_cripto_graficos,
-    matriz_coocorrencia_centralizada,
     matriz_original_vs_cifrada,
     autocorrelacao_normalizada
-
-
 )
 
 __all__ = [
@@ -37,10 +33,8 @@ __all__ = [
     "indice_coincidencia",
     "tamanho_bytes",
     "entropia",
-    "autocorrelacao"
     "matriz_coocorrencia"
     "gerar_dados_cripto_graficos",
-    "matriz_coocorrencia_centralizada",
     "matriz_original_vs_cifrada",
     "autocorrelacao_normalizada"
 ]
